@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Intern Task Mentor</title>
+<style>
+:root{--bg:#f5f6fa;--card:#fff;--ink:#1d2433;--mute:#667085;--line:#e4e7ec;--pri:#4f46e5;--ok:#12805c;--warn:#b54708;--bad:#c01048;--bot:#eef2ff;--me:#e8f7ef}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Tamil","Noto Sans Devanagari",sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--pri);color:#fff;padding:16px 20px}header h1{margin:0;font-size:20px}header p{margin:4px 0 0;opacity:.85;font-size:13px}
+nav{display:flex;gap:6px;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap}
+nav button{border:1px solid var(--line);background:#fff;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600;color:var(--mute)}
+nav button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+main{max-width:1000px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+h2{font-size:17px;margin:0 0 12px}label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px}
+input,textarea,select{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:14px}
+textarea{min-height:80px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{background:var(--pri);color:#fff;border:0;padding:9px 16px;border-radius:8px;font-weight:600;cursor:pointer;margin-top:12px}
+.btn.sec{background:#fff;color:var(--pri);border:1px solid var(--pri)}.btn.sm{padding:6px 10px;font-size:13px;margin-top:0}
+.hide{display:none}.mute{color:var(--mute);font-size:13px}
+.chat{height:380px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fafbff}
+.msg{max-width:85%;padding:9px 12px;border-radius:12px;margin:6px 0;white-space:pre-wrap;font-size:14px;line-height:1.45}
+.msg.bot{background:var(--bot)}.msg.me{background:var(--me);margin-left:auto}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700}
+.b-Assigned{background:#eef2ff;color:var(--pri)}.b-Submitted{background:#fef6e7;color:var(--warn)}.b-NeedsChanges{background:#fff1f3;color:var(--bad)}.b-Completed{background:#e8f7ef;color:var(--ok)}.b-Escalated{background:#f2f4f7;color:#344054}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+.mail{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;background:#fff}
+.mail .s{font-weight:700}.mail pre{white-space:pre-wrap;font-family:inherit;font-size:13px;margin:8px 0 0}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}.flow span{background:#eef2ff;padding:4px 8px;border-radius:6px}
+@media(max-width:640px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><h1>AI Intern Task Mentor</h1><p>Assign tasks to interns, explain them in a human voice (Tamil / English / Hindi), review submissions, and keep giving feedback until the work matches the expected output.</p></header>
+<nav>
+ <button data-tab="admin" class="on">1. Company (Admin)</button>
+ <button data-tab="intern">2. Intern Chatbot</button>
+ <button data-tab="mail">3. Email Outbox</button>
+ <button data-tab="dash">4. Dashboard</button>
+</nav>
+<main>
+
+<!-- ADMIN -->
+<section id="admin">
+ <div class="card"><div class="flow"><span>Assign task</span>→<span>AI explains (voice, 3 languages)</span>→<span>Email: link + review date</span>→<span>Intern submits</span>→<span>AI compares with expected output</span>→<span>Feedback + new date (repeat)</span>→<span>Completed</span></div></div>
+ <div class="card">
+  <h2>Assign a new task to an intern</h2>
+  <div class="row">
+   <div><label>Company name</label><input id="f_company" value="Digital Prospo"></div>
+   <div><label>Task title</label><input id="f_title" value="Build a login page"></div>
+  </div>
+  <label>Task description</label>
+  <textarea id="f_desc">Create a responsive login page with email and password fields, input validation, and a forgot password link.</textarea>
+  <label>Expected output (one requirement per line; the AI checks each one)</label>
+  <textarea id="f_criteria">email field
+password field
+input validation
+forgot password link
+responsive design</textarea>
+  <div class="row">
+   <div><label>Intern name</label><input id="f_intern" value="Risvana"></div>
+   <div><label>Intern email</label><input id="f_email" type="email" value="rispro31@gmail.com"></div>
+  </div>
+  <div class="row">
+   <div><label>Intern's language</label><select id="f_lang"><option value="en">English</option><option value="ta">Tamil (தமிழ்)</option><option value="hi">Hindi (हिन्दी)</option></select></div>
+   <div><label>Days until each review</label><input id="f_days" type="number" min="1" value="3"></div>
+  </div>
+  <div class="row">
+   <div><label>Pass score (%)</label><input id="f_pass" type="number" min="50" max="100" value="80"></div>
+   <div><label>Max attempts before a human mentor steps in</label><input id="f_max" type="number" min="1" value="5"></div>
+  </div>
+  <button class="btn" id="assignBtn">Assign task and email intern</button>
+ </div>
+ <div class="card">
+  <h2>AI settings (optional)</h2>
+  <p class="mute">Without a key, the app uses a built-in checklist matcher. Add a free Google Gemini API key for smarter AI review and chatbot answers.</p>
+  <label>Gemini API key</label><input id="f_key" type="password" placeholder="Paste key (stored only in this browser)">
+  <button class="btn sec" id="saveKey">Save key</button>
+ </div>
+</section>
+
+<!-- INTERN -->
+<section id="intern" class="hide">
+ <div class="card">
+  <div class="row">
+   <div><label>Intern task (opened from the email link)</label><select id="i_task"></select></div>
+   <div><label>Explanation language</label><select id="i_lang"><option value="en">English</option><option value="ta">Tamil (தமிழ்)</option><option value="hi">Hindi (हिन्दी)</option></select></div>
+  </div>
+  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+   <button class="btn sm" id="playBtn">Play voice explanation</button>
+   <button class="btn sm sec" id="stopBtn">Stop voice</button>
+   <span id="i_status"></span>
+  </div>
+ </div>
+ <div class="card" id="voiceCard">
+  <h2>Human voice (real voice of the mentor)</h2>
+  <p class="mute">Read the text below in your own voice and record it, or upload a voice file (mp3 / m4a / wav) recorded on your phone. Do this once for each language. The intern then hears your real human voice. If no voice is saved, the app falls back to the computer voice.</p>
+  <label>Text to read for the selected language</label>
+  <div class="msg bot" id="script" style="max-width:100%"></div>
+  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+   <button class="btn sm" id="recBtn">&#9679; Start recording</button>
+   <button class="btn sm sec" id="recStop" disabled>Stop &amp; save</button>
+   <label class="btn sm sec" style="display:inline-block;cursor:pointer;margin:0">Upload voice file<input type="file" id="upl" accept="audio/*" class="hide"></label>
+   <button class="btn sm sec" id="dlVoice">Download this voice</button>
+   <button class="btn sm sec" id="delVoice">Delete voice</button>
+  </div>
+  <p id="vstat" class="mute"></p>
+  <audio id="prev" controls class="hide" style="width:100%"></audio>
+ </div>
+ <div class="card">
+  <h2>Chat with your AI mentor</h2>
+  <div class="chat" id="chat"></div>
+  <div style="display:flex;gap:8px;margin-top:8px">
+   <input id="q" placeholder="Ask about the task, e.g. What is the deadline?"><button class="btn sm" id="askBtn">Send</button>
+  </div>
+ </div>
+ <div class="card" id="submitCard">
+  <h2>Submit your task</h2>
+  <label>Paste your work, a description of what you built, or a GitHub link with a summary</label>
+  <textarea id="i_sub" placeholder="e.g. I built a responsive login page with email field, password field..."></textarea>
+  <button class="btn" id="submitBtn">Submit task</button>
+  <button class="btn sec" id="reviewNow" title="Skips waiting for the review date for the demo">Run review now (demo)</button>
+ </div>
+</section>
+
+<!-- MAIL -->
+<section id="mail" class="hide">
+ <div class="card"><h2>Email outbox</h2><p class="mute">Emails the system sends to interns. Click "Send from my mail app" to send one for real.</p><div id="mails"></div></div>
+</section>
+
+<!-- DASH -->
+<section id="dash" class="hide">
+ <div class="card"><h2>All interns and tasks</h2><div style="overflow:auto"><table id="dt"></table></div>
+ <button class="btn sec" id="resetBtn">Reset all demo data</button></div>
+</section>
+</main>
+
+<script>
+// ---------- storage ----------
+const KEY='aitm_v1';
+let S={tasks:[],mails:[],apiKey:''};
+try{const s=localStorage.getItem(KEY);if(s)S=JSON.parse(s)}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=d=>new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+const addDays=n=>{const d=new Date();d.setDate(d.getDate()+Number(n));return d.toISOString()};
+
+// ---------- 3-language text ----------
+const T={
+ en:{hello:(t)=>`Hello ${t.intern}! Welcome to ${t.company}.\n\nYour task is: ${t.title}.\n${t.desc}\n\nTo complete it, your work must include: ${t.criteria.join(', ')}.\n\nPlease submit before ${fmt(t.reviewDate)} using the submission link sent to your email. All the best!`,
+  fb:(sc)=>`Your submission matches ${sc}% of the expected output. Please make these changes:`,
+  item:'Add or fix: ', done:`Congratulations! Your output matches the company's expected output. Your task is completed.`,
+  next:(d)=>`Please resubmit before ${d}.`,good:'Done well: '},
+ ta:{hello:(t)=>`வணக்கம் ${t.intern}! ${t.company} நிறுவனத்திற்கு வரவேற்கிறோம்.\n\nஉங்கள் பணி: ${t.title}.\n${t.desc}\n\nஇந்தப் பணியை முடிக்க, உங்கள் வேலையில் இவை இருக்க வேண்டும்: ${t.criteria.join(', ')}.\n\n${fmt(t.reviewDate)} தேதிக்கு முன், உங்கள் மின்னஞ்சலில் அனுப்பப்பட்ட இணைப்பின் மூலம் சமர்ப்பிக்கவும். வாழ்த்துக்கள்!`,
+  fb:(sc)=>`உங்கள் சமர்ப்பிப்பு எதிர்பார்க்கப்பட்ட வெளியீட்டுடன் ${sc}% பொருந்துகிறது. இந்த மாற்றங்களைச் செய்யவும்:`,
+  item:'சேர்க்கவும் / சரிசெய்யவும்: ', done:'வாழ்த்துக்கள்! உங்கள் வெளியீடு நிறுவனம் எதிர்பார்க்கும் வெளியீட்டுடன் பொருந்துகிறது. உங்கள் பணி முடிந்தது.',
+  next:(d)=>`${d} தேதிக்கு முன் மீண்டும் சமர்ப்பிக்கவும்.`,good:'சரியாக செய்தவை: '},
+ hi:{hello:(t)=>`नमस्ते ${t.intern}! ${t.company} में आपका स्वागत है।\n\nआपका टास्क है: ${t.title}.\n${t.desc}\n\nइसे पूरा करने के लिए आपके काम में ये चीज़ें होनी चाहिए: ${t.criteria.join(', ')}.\n\nकृपया ${fmt(t.reviewDate)} से पहले अपने ईमेल में भेजे गए लिंक से सबमिट करें। शुभकामनाएँ!`,
+  fb:(sc)=>`आपका सबमिशन अपेक्षित आउटपुट से ${sc}% मेल खाता है। कृपया ये बदलाव करें:`,
+  item:'जोड़ें / सुधारें: ', done:'बधाई हो! आपका आउटपुट कंपनी के अपेक्षित आउटपुट से मेल खाता है। आपका टास्क पूरा हुआ।',
+  next:(d)=>`कृपया ${d} से पहले दोबारा सबमिट करें।`,good:'अच्छा किया: '}
+};
+const VOICE_LANG={en:'en-IN',ta:'ta-IN',hi:'hi-IN'};
+
+// ---------- tabs ----------
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.tab));
+function show(tab){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+ ['admin','intern','mail','dash'].forEach(s=>$(s).classList.toggle('hide',s!==tab));render();}
+
+// ---------- email ----------
+function link(t){return location.href.split('#')[0]+'#task='+t.id}
+function sendMail(t,subject,body){S.mails.unshift({to:t.email,subject,body,at:new Date().toISOString()});save();}
+function mailAssign(t){
+ sendMail(t,`New task assigned: ${t.title}`,
+`Hi ${t.intern},
+
+You have been assigned a new task by ${t.company}.
+
+Task: ${t.title}
+Submission link: ${link(t)}
+Review date: ${fmt(t.reviewDate)}
+
+Open the link to hear your AI mentor explain the task in ${({en:'English',ta:'Tamil',hi:'Hindi'})[t.lang]}, ask questions, and submit your work.
+
+Regards,
+${t.company} AI Mentor`);}
+
+// ---------- assign ----------
+$('assignBtn').onclick=()=>{
+ const crit=$('f_criteria').value.split('\n').map(s=>s.trim()).filter(Boolean);
+ if(!$('f_title').value.trim()||!$('f_intern').value.trim()||!$('f_email').value.trim()||!crit.length){alert('Please fill title, intern name, email and expected output.');return}
+ const t={id:Date.now().toString(36),company:$('f_company').value.trim(),title:$('f_title').value.trim(),desc:$('f_desc').value.trim(),
+  criteria:crit,intern:$('f_intern').value.trim(),email:$('f_email').value.trim(),lang:$('f_lang').value,days:Number($('f_days').value)||3,
+  pass:Number($('f_pass').value)||80,max:Number($('f_max').value)||5,status:'Assigned',reviewDate:'',attempts:[],pending:null,created:new Date().toISOString()};
+ t.reviewDate=addDays(t.days);S.tasks.unshift(t);mailAssign(t);save();
+ alert(`Task assigned. Email with submission link and review date sent to ${t.email}.`);
+ curTask=t.id;show('intern');
+};
+$('f_key').value=S.apiKey||'';
+$('saveKey').onclick=()=>{S.apiKey=$('f_key').value.trim();save();alert(S.apiKey?'Gemini key saved. AI review is on.':'Key removed. Using built-in checker.')};
+
+// ---------- intern chatbot ----------
+let curTask=null;
+function task(){return S.tasks.find(t=>t.id===curTask)}
+function bot(text){addMsg('bot',text)}
+function addMsg(who,text){const d=document.createElement('div');d.className='msg '+who;d.textContent=text;$('chat').appendChild(d);$('chat').scrollTop=1e9}
+function loadChat(){
+ $('chat').innerHTML='';const t=task();if(!t){bot('No task yet. Ask the company admin to assign one.');return}
+ const L=T[$('i_lang').value];bot(L.hello(t));
+ t.attempts.forEach(a=>{addMsg('me','Submitted (attempt '+a.n+'):\n'+a.content);bot(a.feedback)});
+ if(t.pending)bot('Your submission was received. It will be reviewed on '+fmt(t.reviewDate)+'.');
+}
+$('i_task').onchange=()=>{curTask=$('i_task').value;const t=task();if(t)$('i_lang').value=t.lang;loadChat();renderIntern()};
+$('i_lang').onchange=()=>{loadChat();refreshVoice()};
+
+// voice
+function speak(text,lang){
+ if(!('speechSynthesis'in window)){alert('Voice is not supported in this browser. Please use Chrome.');return}
+ speechSynthesis.cancel();
+ const code=VOICE_LANG[lang],voices=speechSynthesis.getVoices();
+ // prefer the most human-sounding voice: Natural (neural) > Online > Google > any
+ const cand=voices.filter(v=>v.lang.replace('_','-').toLowerCase().startsWith(code.slice(0,2)));
+ const rank=v=>/natural/i.test(v.name)?0:/online/i.test(v.name)?1:/google/i.test(v.name)?2:3;
+ cand.sort((a,b)=>rank(a)-rank(b)||(b.lang.replace('_','-')===code)-(a.lang.replace('_','-')===code));
+ const v=cand[0];
+ if(!v&&lang!=='en')bot(`Note: no ${code} voice is installed on this device, so the voice may sound wrong. Chrome on Android/Windows usually includes Tamil and Hindi voices.`);
+ // speak in sentence chunks (long text gets cut off in some browsers)
+ text.split(/(?<=[.!?।])\s+/).forEach(part=>{const u=new SpeechSynthesisUtterance(part);u.lang=code;if(v)u.voice=v;u.rate=.92;u.pitch=1;speechSynthesis.speak(u)});
+}
+speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();speechSynthesis.getVoices();
+const player=new Audio();
+function stopAll(){speechSynthesis.cancel();player.pause()}
+$('playBtn').onclick=()=>{const t=task();if(!t)return;const l=$('i_lang').value;stopAll();
+ const a=t.voice&&t.voice[l];
+ if(a){player.src=a;player.play().catch(()=>alert('Could not play the saved voice. Please record it again.'))}
+ else repoVoice(l).then(ok=>{if(!ok)speak(T[l].hello(t),l)})};
+// human voice files shipped with the app: voices/en.webm, voices/ta.webm, voices/hi.webm (mp3, m4a, wav, ogg also work)
+function repoVoice(l){return new Promise(res=>{const ex=['webm','mp3','m4a','wav','ogg'];let i=0;
+ const next=()=>{if(i>=ex.length){res(false);return}
+  const url='voices/'+l+'.'+ex[i++],a=new Audio(url);let done=false;
+  a.onerror=()=>{if(!done){done=true;next()}};
+  a.oncanplay=()=>{if(done)return;done=true;player.src=url;player.play().then(()=>res(true)).catch(()=>res(false))};
+  a.load()};
+ next()})}
+$('dlVoice').onclick=()=>{
+ const t=task(),l=$('i_lang').value,a=t&&t.voice&&t.voice[l];
+ if(!a){alert('No voice saved for this language yet.');return}
+ const m=a.slice(5,a.indexOf(';')),ext=({'audio/mpeg':'mp3','audio/mp3':'mp3','audio/mp4':'m4a','audio/x-m4a':'m4a','audio/wav':'wav','audio/x-wav':'wav','audio/ogg':'ogg','audio/webm':'webm'})[m]||'webm';
+ const k=document.createElement('a');k.href=a;k.download=l+'.'+ext;document.body.appendChild(k);k.click();k.remove()};
+$('stopBtn').onclick=stopAll;
+
+// ---------- human voice: record or upload ----------
+let rec=null,chunks=[],stream=null;
+function refreshVoice(){
+ const t=task(),l=$('i_lang').value;
+ $('script').textContent=t?T[l].hello(t):'Assign a task first.';
+ const a=t&&t.voice&&t.voice[l];
+ $('vstat').innerHTML=a?'<b style="color:var(--ok)">&#10004; Human voice saved for this language</b>':'No human voice saved for this language yet (a file from the voices folder, or else the computer voice, will play).';
+ const p=$('prev');if(a){p.src=a;p.classList.remove('hide')}else{p.removeAttribute('src');p.classList.add('hide')}
+}
+function putVoice(url){
+ const t=task(),l=$('i_lang').value;t.voice=t.voice||{};const old=t.voice[l];t.voice[l]=url;
+ try{localStorage.setItem(KEY,JSON.stringify(S))}
+ catch(e){if(old)t.voice[l]=old;else delete t.voice[l];alert('Not enough browser storage. Please record a shorter voice (under 1 minute).');}
+ refreshVoice();
+}
+function toData(blob){
+ if(blob.size>1500000){alert('Audio is too big (max about 1.5 MB). Record under 1 minute or use a smaller file.');return}
+ const b=new Blob([blob],{type:blob.type||'audio/mpeg'});
+ const fr=new FileReader();fr.onload=()=>putVoice(fr.result);fr.readAsDataURL(b);
+}
+$('recBtn').onclick=async()=>{
+ if(!task()){alert('Assign a task first.');return}
+ try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}
+ catch(e){alert('Microphone is blocked. Click Allow when the browser asks, or use "Upload voice file" instead.');return}
+ chunks=[];rec=new MediaRecorder(stream);
+ rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+ rec.onstop=()=>{stream.getTracks().forEach(x=>x.stop());toData(new Blob(chunks,{type:rec.mimeType||'audio/webm'}))};
+ rec.start();$('recBtn').disabled=true;$('recStop').disabled=false;
+ $('vstat').textContent='Recording... read the text above in your voice, then click "Stop & save".';
+};
+$('recStop').onclick=()=>{if(rec&&rec.state!=='inactive')rec.stop();$('recBtn').disabled=false;$('recStop').disabled=true};
+$('upl').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(!task()){alert('Assign a task first.');return}toData(f)};
+$('delVoice').onclick=()=>{const t=task(),l=$('i_lang').value;if(t&&t.voice&&t.voice[l]){delete t.voice[l];save();refreshVoice()}};
+
+// questions
+$('askBtn').onclick=ask;$('q').onkeydown=e=>{if(e.key==='Enter')ask()};
+async function ask(){
+ const q=$('q').value.trim();if(!q)return;$('q').value='';addMsg('me',q);const t=task();if(!t){bot('No task assigned yet.');return}
+ if(S.apiKey){try{const r=await gemini(`You are a friendly AI mentor for an intern. Reply in ${({en:'English',ta:'Tamil',hi:'Hindi'})[$('i_lang').value]} in under 80 words. Do not do the task for them; guide them.
+Task: ${t.title}. ${t.desc}. Expected output: ${t.criteria.join('; ')}. Review date: ${fmt(t.reviewDate)}. Status: ${t.status}.
+Intern question: ${q}`);bot(r);return}catch(e){}}
+ const s=q.toLowerCase();
+ if(/date|deadline|when|last|review/.test(s))bot('Your review date is '+fmt(t.reviewDate)+'.');
+ else if(/submit|link|upload/.test(s))bot('Use the "Submit your task" box below. Your link is:\n'+link(t));
+ else if(/expect|need|require|include|output/.test(s))bot('Your work must include:\n- '+t.criteria.join('\n- '));
+ else if(/status|result|feedback/.test(s))bot('Current status: '+t.status+(t.attempts.length?'\nLast feedback:\n'+t.attempts.at(-1).feedback:''));
+ else bot('Good question! Focus on these requirements:\n- '+t.criteria.join('\n- ')+'\nAsk me about the deadline, the submission link, or the expected output.');
+}
+
+// submit
+$('submitBtn').onclick=()=>{
+ const t=task();if(!t)return;if(t.status==='Completed'||t.status==='Escalated'){alert('This task is closed.');return}
+ const c=$('i_sub').value.trim();if(c.length<10){alert('Please describe or paste your work.');return}
+ t.pending={content:c,at:new Date().toISOString()};t.status='Submitted';$('i_sub').value='';save();
+ addMsg('me','Submitted:\n'+c);bot('Thanks! Your submission was received. It will be reviewed on '+fmt(t.reviewDate)+'.');renderIntern();
+};
+$('reviewNow').onclick=()=>{const t=task();if(!t||!t.pending){alert('Submit the task first.');return}review(t)};
+
+// ---------- AI review ----------
+const STOP=new Set('a an the and or of to for with in on is be must should page use using add have has its it'.split(' '));
+function words(s){return s.toLowerCase().replace(/[^a-z0-9஀-௿ऀ-ॿ\s]/g,' ').split(/\s+/).filter(w=>w.length>1&&!STOP.has(w))}
+function stem(w){return w.replace(/(ing|ed|es|s)$/,'')}
+function localCheck(t,content){
+ const sub=new Set(words(content).map(stem));
+ const met=[],missing=[];
+ t.criteria.forEach(c=>{const ws=words(c).map(stem);const hit=ws.filter(w=>sub.has(w)).length;(ws.length&&hit/ws.length>=.6?met:missing).push(c)});
+ return{score:Math.round(met.length/t.criteria.length*100),met,missing};
+}
+async function gemini(prompt){
+ const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key='+encodeURIComponent(S.apiKey),
+  {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+ const j=await r.json();return j.candidates[0].content.parts[0].text.trim();
+}
+async function aiCheck(t,content){
+ const txt=await gemini(`Compare an intern's submission with the company's expected output. For each requirement decide if it is clearly met.
+Requirements:\n${t.criteria.map((c,i)=>i+1+'. '+c).join('\n')}\n\nSubmission:\n${content}\n
+Reply ONLY JSON: {"met":["exact requirement text"],"missing":[{"item":"exact requirement text","fix":"one short specific suggestion"}]}`);
+ const j=JSON.parse(txt.replace(/```json|```/g,''));
+ return{score:Math.round(j.met.length/t.criteria.length*100),met:j.met,missing:j.missing.map(m=>m.item+' — '+m.fix)};
+}
+async function review(t){
+ const p=t.pending;if(!p)return;let r;
+ if(S.apiKey){try{r=await aiCheck(t,p.content)}catch(e){r=null}}
+ if(!r)r=localCheck(t,p.content);
+ const L=T[t.lang],n=t.attempts.length+1,passed=r.score>=t.pass;let fb;
+ if(passed){fb=L.done+` (${r.score}%)`;t.status='Completed';}
+ else{
+  t.reviewDate=addDays(t.days);
+  fb=L.fb(r.score)+'\n'+r.missing.map(m=>'- '+L.item+m).join('\n')+(r.met.length?'\n\n'+L.good+r.met.join(', '):'')+'\n\n'+L.next(fmt(t.reviewDate));
+  t.status=n>=t.max?'Escalated':'NeedsChanges';
+  if(t.status==='Escalated')fb+=`\n\n(Maximum ${t.max} attempts reached. A human mentor will contact you.)`;
+ }
+ t.attempts.push({n,content:p.content,submittedAt:p.at,reviewedAt:new Date().toISOString(),score:r.score,feedback:fb});t.pending=null;
+ if(passed)sendMail(t,`Task completed: ${t.title}`,`Hi ${t.intern},\n\n${fb}\n\nAttempts taken: ${n}\n\nWell done!\n${t.company} AI Mentor`);
+ else if(t.status==='Escalated')sendMail(t,`Task review: ${t.title} (mentor follow-up)`,`Hi ${t.intern},\n\nFeedback on attempt ${n}:\n\n${fb}\n\n${t.company} AI Mentor`);
+ else sendMail(t,`Feedback on your task: ${t.title} (attempt ${n})`,`Hi ${t.intern},\n\nFeedback on attempt ${n}:\n\n${fb}\n\nResubmission link: ${link(t)}\nNext review date: ${fmt(t.reviewDate)}\n\n${t.company} AI Mentor`);
+ save();render();if(t.id===curTask){bot(fb);renderIntern()}
+}
+// automatic review when the review date arrives
+function autoReview(){S.tasks.forEach(t=>{if(t.pending&&new Date(t.reviewDate)<=new Date())review(t)})}
+setInterval(autoReview,30000);
+
+// ---------- render ----------
+function badge(s){return `<span class="badge b-${s}">${s==='NeedsChanges'?'Needs changes':s}</span>`}
+function renderIntern(){
+ const sel=$('i_task');sel.innerHTML=S.tasks.map(t=>`<option value="${t.id}">${esc(t.intern)} — ${esc(t.title)}</option>`).join('')||'<option>No tasks yet</option>';
+ if(curTask)sel.value=curTask;const t=task();
+ $('i_status').innerHTML=t?badge(t.status)+` <span class="mute">Attempt ${t.attempts.length+(t.pending?1:0)} · Review: ${fmt(t.reviewDate)}</span>`:'';
+ $('submitCard').classList.toggle('hide',!t||t.status==='Completed'||t.status==='Escalated');
+ refreshVoice();
+}
+function render(){
+ renderIntern();
+ $('mails').innerHTML=S.mails.map(m=>`<div class="mail"><div class="s">${esc(m.subject)}</div><div class="mute">To: ${esc(m.to)} · ${new Date(m.at).toLocaleString('en-IN')}</div><pre>${esc(m.body)}</pre>
+  <a class="btn sm sec" style="display:inline-block;margin-top:8px;text-decoration:none" href="mailto:${encodeURIComponent(m.to)}?subject=${encodeURIComponent(m.subject)}&body=${encodeURIComponent(m.body)}">Send from my mail app</a> <a class="btn sm" style="display:inline-block;margin-top:8px;text-decoration:none" target="_blank" rel="noopener" href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=${encodeURIComponent(m.to)}&amp;su=${encodeURIComponent(m.subject)}&amp;body=${encodeURIComponent(m.body)}">Open in Gmail</a></div>`).join('')||'<p class="mute">No emails yet.</p>';
+ $('dt').innerHTML='<tr><th>Intern</th><th>Task</th><th>Status</th><th>Attempts</th><th>Last score</th><th>Review date</th></tr>'+
+  (S.tasks.map(t=>`<tr><td>${esc(t.intern)}<div class="mute">${esc(t.email)}</div></td><td>${esc(t.title)}</td><td>${badge(t.status)}</td><td>${t.attempts.length}</td><td>${t.attempts.length?t.attempts.at(-1).score+'%':'—'}</td><td>${t.status==='Completed'?'—':fmt(t.reviewDate)}</td></tr>`).join('')||'<tr><td colspan="6" class="mute">No tasks yet.</td></tr>');
+}
+$('resetBtn').onclick=()=>{if(confirm('Delete all demo data?')){S={tasks:[],mails:[],apiKey:S.apiKey};save();curTask=null;loadChat();render()}};
+
+// open from email link (#task=id)
+const h=location.hash.match(/task=([\w]+)/);
+if(h&&S.tasks.some(t=>t.id===h[1])){curTask=h[1];show('intern')}else{curTask=S.tasks[0]?.id||null;render()}
+if(task())$('i_lang').value=task().lang;loadChat();autoReview();
+</script>
+</body>
+</html>
